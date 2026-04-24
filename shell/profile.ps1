@@ -30,6 +30,7 @@ function start-ai {
     $env:LAB_PROJECT_PATH = $sessionPath
     $env:LAB_SESSION_NAME = $Name
     Set-LabSessionState -SessionName $Name -ProjectPath $sessionPath -Mode "quickstart"
+    (Get-Date -Format "o") | Set-Content (Join-Path $sessionPath "SESSION_START.txt") -Encoding UTF8
     zellij --layout (Get-LabLayoutPath "universal.kdl")
 }
 

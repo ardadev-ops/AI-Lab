@@ -31,6 +31,15 @@ Wenn du eine Aufgabe abgeschlossen hast oder Codex etwas übernehmen soll, schre
 
 Lösche keine Einträge — Rotation erfolgt automatisch durch den Stop-Hook.
 
+## MISSION.md — Live-Arbeitsplan
+Halte MISSION.md während der Arbeit aktuell:
+- Task starten   -> [~] In Arbeit setzen
+- Task fertig    -> [x] Erledigt, nächsten aus Next Up holen
+- Neuer Schritt  -> unter Next Up eintragen
+- Erkenntnis     -> kurz unter Notizen
+
+Maximal 3 Eintraege pro Sektion. Token-freundlich: ein Satz pro Eintrag.
+
 ## Werkbank-Wissen (optional)
 Im Lab-Home-Verzeichnis liegt `WORKBENCH_BRAIN.md` mit destillierten Lektionen aus abgeschlossenen Projekten.
 Pfad ermitteln: PowerShell-Variable `$env:LAB_HOME`, dann `WORKBENCH_BRAIN.md` darin lesen.

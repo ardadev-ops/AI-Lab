@@ -57,5 +57,6 @@ $env:LAB_PROJECT_PATH = $root
 $env:LAB_SESSION_NAME = $Target
 if (-not $env:LAB_HOME) { $env:LAB_HOME = Get-LabHome }
 Set-LabSessionState -SessionName $Target -ProjectPath $root -Mode "project"
+(Get-Date -Format "o") | Set-Content (Join-Path $root "SESSION_START.txt") -Encoding UTF8
 Set-Location $root
 zellij --layout (Get-LabLayoutPath "universal.kdl")
