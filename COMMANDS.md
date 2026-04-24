@@ -25,8 +25,9 @@
 | `lab-phase [Phase]`       | Phase wechseln: Brainstorming / Entwicklung / Debugging|
 | `lab-open`                | Aktuelles Projektverzeichnis im Explorer öffnen       |
 | `lab-report`              | Bericht aus MISSION + DNA + USAGE als .md generieren  |
+| `lab-complete [Name]`     | Projekt abschließen: Lektionen → WORKBENCH_BRAIN.md, Abschlussbericht, aus Registry entfernen |
 | `lab-delete [Name]`       | Projekt aus der Lab-Registry entfernen                |
-| `lab-delete [Name] -DeleteFiles` | Wie oben, Projektordner ebenfalls lÃ¶schen    |
+| `lab-delete [Name] -DeleteFiles` | Wie oben, Projektordner ebenfalls löschen    |
 | `lab-clean`               | Bekannte Lab-Sessions nach BestÃ¤tigung beenden        |
 | `lab --kill [Name]`       | Einzelne Session beenden                              |
 | `lab --list`              | Alle registrierten Projekte auflisten                 |

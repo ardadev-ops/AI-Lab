@@ -35,3 +35,30 @@ if (-not $isQuickstart) {
         git -C $projectPath commit -m "Checkpoint: $date [$phase]" 2>$null
     }
 }
+
+# 3. SCRATCHPAD-Rotation: letzte 5 Einträge behalten, Rest archivieren
+$scratchpadPath = Join-Path $projectPath "SCRATCHPAD.md"
+if (Test-Path $scratchpadPath) {
+    $raw = Get-Content $scratchpadPath -Raw -Encoding UTF8
+
+    $match = [regex]::Match($raw, '(?m)^## \[(Claude|Codex)')
+    if ($match.Success) {
+        $header = $raw.Substring(0, $match.Index)
+        $entriesRaw = $raw.Substring($match.Index)
+
+        $entryParts = [regex]::Split($entriesRaw, '(?m)(?=^## \[(Claude|Codex))') |
+            Where-Object { $_ -match '\S' }
+
+        if ($entryParts.Count -gt 5) {
+            $toArchive = $entryParts[0..($entryParts.Count - 6)]
+            $toKeep    = $entryParts[($entryParts.Count - 5)..($entryParts.Count - 1)]
+
+            $archivePath = Join-Path $projectPath "SCRATCHPAD_archive.md"
+            $archivePrefix = if (-not (Test-Path $archivePath)) { "# SCRATCHPAD Archive`n`n" } else { "" }
+            Add-Content -Path $archivePath -Value ($archivePrefix + ($toArchive -join "")) -Encoding UTF8
+
+            $newContent = $header.TrimEnd() + "`n`n" + ($toKeep -join "")
+            Set-Content -Path $scratchpadPath -Value $newContent -Encoding UTF8 -NoNewline
+        }
+    }
+}

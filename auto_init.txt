@@ -1,1 +1,1 @@
-"Lies die Datei BOOTSTRAP.md in diesem Verzeichnis. Das ist unser Protokoll. Erstelle jetzt einen Arbeitsplan für das Projekt basierend auf der MISSION.md und bewerte ihn mit einem Confidence-Score. Wir arbeiten strikt in ./src/."
+Starte die Session gemäß Protokoll.

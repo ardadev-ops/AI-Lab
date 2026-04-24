@@ -257,3 +257,84 @@ function lab-delete {
 
     Write-Host "Projekt '$ProjectName' entfernt." -ForegroundColor Green
 }
+
+function lab-complete {
+    param([string]$ProjectName)
+    if (-not $ProjectName) {
+        Write-Host "Usage: lab-complete [Name]" -ForegroundColor Red
+        return
+    }
+
+    $configPathFile = Join-Path (Get-LabProjectsDirectory) "$ProjectName.path"
+    if (-not (Test-Path $configPathFile)) {
+        Write-Host "Projekt '$ProjectName' nicht gefunden." -ForegroundColor Red
+        return
+    }
+
+    $projectPath = (Get-Content $configPathFile -Raw -Encoding UTF8).Trim()
+    $brainPath   = Join-Path (Get-LabHome) "WORKBENCH_BRAIN.md"
+    $date        = Get-Date -Format "yyyy-MM-dd"
+
+    # PROJECT_DNA.md anzeigen wenn vorhanden
+    $dnaPath    = Join-Path $projectPath "PROJECT_DNA.md"
+    $dnaContent = if (Test-Path $dnaPath) { (Get-Content $dnaPath -Raw -Encoding UTF8).Trim() } else { "" }
+    if ($dnaContent) {
+        Write-Host "`n=== PROJECT_DNA.md ===" -ForegroundColor Cyan
+        Write-Host $dnaContent
+        Write-Host "======================`n" -ForegroundColor Cyan
+    }
+
+    # Lektionen einsammeln
+    Write-Host "Lektionen fuer WORKBENCH_BRAIN.md eingeben:" -ForegroundColor Yellow
+    Write-Host "  Format: [tag] Lektion   (z.B. [python] Immer venv vor Start aktivieren)" -ForegroundColor DarkGray
+    Write-Host "  Leer lassen + Enter zum Beenden`n" -ForegroundColor DarkGray
+
+    $newLessons = [System.Collections.Generic.List[string]]::new()
+    $i = 1
+    while ($true) {
+        $entry = Read-Host "  Lektion $i"
+        if (-not $entry.Trim()) { break }
+        $newLessons.Add("[$date] [$ProjectName] $entry")
+        $i++
+    }
+
+    if ($newLessons.Count -gt 0) {
+        if (-not (Test-Path $brainPath)) {
+            Set-Content $brainPath -Value "# WORKBENCH BRAIN`nDestillierte Lektionen aus abgeschlossenen Projekten. Max 50 Eintraege, aelteste rotieren raus.`nNur bei Bedarf lesen. Nicht automatisch laden.`n`n---`n" -Encoding UTF8
+        }
+
+        Add-Content $brainPath -Value ($newLessons -join "`n") -Encoding UTF8
+
+        # Rotation: max 50 Eintraege (Zeilen die mit [20xx- beginnen)
+        $allLines = Get-Content $brainPath -Encoding UTF8
+        $header   = $allLines | Where-Object { $_ -notmatch '^\[20\d\d-' }
+        $entries  = @($allLines | Where-Object { $_ -match '^\[20\d\d-' })
+        if ($entries.Count -gt 50) {
+            $entries = $entries | Select-Object -Last 50
+            ($header + $entries) -join "`n" | Set-Content $brainPath -Encoding UTF8
+        }
+
+        Write-Host "`n$($newLessons.Count) Lektion(en) in WORKBENCH_BRAIN.md eingetragen." -ForegroundColor Green
+    }
+
+    # Abschlussbericht generieren
+    $reportPath    = Join-Path $projectPath ("REPORT_" + $date + ".md")
+    $reportContent = "# PROJEKTBERICHT: $ProjectName`n_Abgeschlossen: $(Get-Date -Format 'dd.MM.yyyy HH:mm')_`n`n"
+    foreach ($f in @("MISSION.md", "PROJECT_DNA.md", "USAGE.md")) {
+        $fp = Join-Path $projectPath $f
+        if (Test-Path $fp) {
+            $reportContent += "---`n`n" + (Get-Content $fp -Raw -Encoding UTF8).Trim() + "`n`n"
+        }
+    }
+    $reportContent | Out-File $reportPath -Encoding UTF8
+    Write-Host "Abschlussbericht erstellt: $reportPath" -ForegroundColor Green
+
+    # Projekt aus Registry entfernen (Dateien bleiben)
+    $confirm = Read-Host "`nProjekt aus Registry entfernen? Ordner und Dateien bleiben erhalten. (j/n)"
+    if ($confirm -in @("j", "J", "y", "Y")) {
+        zellij delete-session $ProjectName 2>$null
+        Remove-LabSessionState -SessionName $ProjectName
+        Remove-Item -LiteralPath $configPathFile -Force
+        Write-Host "Projekt '$ProjectName' abgeschlossen. Ordner: $projectPath" -ForegroundColor Green
+    }
+}

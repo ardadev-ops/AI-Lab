@@ -176,5 +176,5 @@ while ($true) {
         $lastSignature = $signature
     }
 
-    Start-Sleep 1
+    Start-Sleep 2
 }
