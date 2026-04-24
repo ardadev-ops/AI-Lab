@@ -214,6 +214,84 @@ function lab-clean {
     Write-Host "Lab-Sessions bereinigt." -ForegroundColor Green
 }
 
+function lab-sessions {
+    $running = @(zellij ls 2>&1 | Where-Object { $_ -match '\S' })
+
+    if (-not $running -or $running.Count -eq 0) {
+        Write-Host "Keine laufenden Zellij-Sessions." -ForegroundColor Yellow
+        return
+    }
+
+    $quickstartRoot = Get-LabQuickstartDirectory
+
+    Write-Host "`nLAUFENDE SESSIONS ($($running.Count))" -ForegroundColor Cyan
+    Write-Host ("-" * 50) -ForegroundColor Cyan
+
+    foreach ($line in $running) {
+        $name = ($line -replace '\s.*', '').Trim()
+        if (-not $name) { continue }
+
+        $state = Get-LabSessionState -SessionName $name
+        $path  = if ($state -and $state.ProjectPath) { $state.ProjectPath } else { "" }
+        $phase = "?"
+        $typ   = "unbekannt"
+
+        if ($path -and (Test-Path $path)) {
+            $pf = Join-Path $path "PHASE.txt"
+            if (Test-Path $pf) { $phase = (Get-Content $pf -Encoding UTF8).Trim() }
+            $typ = if ($path.StartsWith($quickstartRoot)) { "quickstart" } else { "projekt" }
+        }
+
+        $color = if ($typ -eq "quickstart") { "Cyan" } else { "Green" }
+        Write-Host ("  {0,-20} [{1,-10}] Phase: {2}" -f $name, $typ, $phase) -ForegroundColor $color
+    }
+    Write-Host ""
+    Write-Host "  lab-kill [Name...]  — gezielt beenden" -ForegroundColor DarkGray
+    Write-Host "  lab-killall         — alle beenden`n" -ForegroundColor DarkGray
+}
+
+function lab-killall {
+    $running = @(zellij ls 2>&1 | Where-Object { $_ -match '\S' } | ForEach-Object { ($_ -replace '\s.*', '').Trim() })
+
+    if (-not $running -or $running.Count -eq 0) {
+        Write-Host "Keine laufenden Sessions." -ForegroundColor Yellow
+        return
+    }
+
+    Write-Host "Laufende Sessions die beendet werden:" -ForegroundColor Yellow
+    $running | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+
+    $confirm = Read-Host "`nAlle $($running.Count) Sessions beenden? (j/n)"
+    if ($confirm -notin @("j", "J", "y", "Y")) {
+        Write-Host "Abgebrochen." -ForegroundColor Yellow
+        return
+    }
+
+    foreach ($name in $running) {
+        zellij delete-session $name 2>$null
+        Remove-LabSessionState -SessionName $name
+    }
+
+    Write-Host "Alle Sessions beendet." -ForegroundColor Green
+}
+
+function lab-kill {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Names)
+
+    if (-not $Names -or $Names.Count -eq 0) {
+        Write-Host "Usage: lab-kill [Name1] [Name2] ..." -ForegroundColor Red
+        Write-Host "       lab-sessions  — laufende Sessions anzeigen" -ForegroundColor DarkGray
+        return
+    }
+
+    foreach ($name in $Names) {
+        $name = $name.Trim()
+        zellij delete-session $name 2>$null
+        Remove-LabSessionState -SessionName $name
+        Write-Host "Beendet: $name" -ForegroundColor Green
+    }
+}
+
 function lab-delete {
     param (
         [string]$ProjectName,

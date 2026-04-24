@@ -28,8 +28,11 @@
 | `lab-complete [Name]`     | Projekt abschließen: Lektionen → WORKBENCH_BRAIN.md, Abschlussbericht, aus Registry entfernen |
 | `lab-delete [Name]`       | Projekt aus der Lab-Registry entfernen                |
 | `lab-delete [Name] -DeleteFiles` | Wie oben, Projektordner ebenfalls löschen    |
-| `lab-clean`               | Bekannte Lab-Sessions nach BestÃ¤tigung beenden        |
-| `lab --kill [Name]`       | Einzelne Session beenden                              |
+| `lab-sessions`            | Alle laufenden Zellij-Sessions anzeigen (live)        |
+| `lab-kill [Name...]`      | Eine oder mehrere Sessions gezielt beenden            |
+| `lab-killall`             | Alle laufenden Sessions auf einmal beenden            |
+| `lab-clean`               | Bekannte Lab-Sessions nach Bestätigung beenden        |
+| `lab --kill [Name]`       | Einzelne Session beenden (alt)                        |
 | `lab --list`              | Alle registrierten Projekte auflisten                 |
 
 ## Automatisch im Hintergrund
