@@ -15,8 +15,10 @@ function start-ai {
     $sessionPath = Join-Path $quickstartRoot $Name
     if (-not (Test-Path $sessionPath)) {
         New-Item -Path $sessionPath -ItemType Directory -Force | Out-Null
-        foreach ($f in @("MISSION.md", "USAGE.md")) {
+        $templateRoot = Get-LabTemplateDirectory
+        foreach ($f in @("MISSION.md", "USAGE.md", "AGENTS.md", "CLAUDE.md", "BOOTSTRAP.md", "SCRATCHPAD.md", "PROJECT_DNA.md", "PHASE.txt")) {
             $src = Join-Path $quickstartRoot $f
+            if (-not (Test-Path $src)) { $src = Join-Path $templateRoot $f }
             if (Test-Path $src) { Copy-Item $src (Join-Path $sessionPath $f) -Force }
         }
     }

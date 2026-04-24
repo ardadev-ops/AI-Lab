@@ -1,29 +1,37 @@
 layout {
+    // Hier kommen die Tabs hin (oben)
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+
+    // Dein Haupt-Layout
     pane split_direction="vertical" {
-        pane split_direction="horizontal" size="76%" {
-            pane split_direction="horizontal" size="68%" {
-                pane name="ACTOR_CLAUDE" command="powershell" {
-                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; if ($env:LAB_SESSION_NAME) { zellij action rename-session $env:LAB_SESSION_NAME }; claude"
-                }
-                pane name="ACTOR_CODEX" command="powershell" {
-                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; codex"
-                }
+        pane split_direction="horizontal" size="70%" {
+            pane name="🤖 CLAUDE" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; claude"
             }
-            pane name="RESEARCH_CHAT" command="powershell" size="32%" {
-                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"
+            pane name="🧠 CODEX" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; codex"
             }
         }
-        pane split_direction="horizontal" size="24%" {
-            pane name="MISSION" command="powershell" {
-                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" MISSION.md"
+        
+        pane split_direction="horizontal" size="30%" {
+            pane split_direction="horizontal" {
+                pane name="🎯 MISSION TO-DO Liste" command="powershell" {
+                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" MISSION.md"
+                }
+                pane name="📊 Token und Session Manager" command="powershell" {
+                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" USAGE.md"
+                }
             }
-            pane name="USAGE" command="powershell" {
-                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" USAGE.md"
+            pane name="💬 Chat mit GEMINI" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"
             }
         }
     }
 
+    // Das hier bringt dir die Shortcut-Leiste unten zurück
     pane size=1 borderless=true {
-        plugin location="zellij:compact-bar"
+        plugin location="zellij:status-bar"
     }
 }
