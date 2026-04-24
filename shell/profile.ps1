@@ -249,8 +249,8 @@ function lab-sessions {
         Write-Host ("  {0,-20} [{1,-10}] Phase: {2}" -f $name, $typ, $phase) -ForegroundColor $color
     }
     Write-Host ""
-    Write-Host "  lab-kill [Name...]  — gezielt beenden" -ForegroundColor DarkGray
-    Write-Host "  lab-killall         — alle beenden`n" -ForegroundColor DarkGray
+    Write-Host "  lab-kill [Name...]  -> gezielt beenden" -ForegroundColor DarkGray
+    Write-Host "  lab-killall         -> alle beenden`n" -ForegroundColor DarkGray
 }
 
 function lab-killall {
@@ -283,7 +283,7 @@ function lab-kill {
 
     if (-not $Names -or $Names.Count -eq 0) {
         Write-Host "Usage: lab-kill [Name1] [Name2] ..." -ForegroundColor Red
-        Write-Host "       lab-sessions  — laufende Sessions anzeigen" -ForegroundColor DarkGray
+        Write-Host "       lab-sessions  -> laufende Sessions anzeigen" -ForegroundColor DarkGray
         return
     }
 
