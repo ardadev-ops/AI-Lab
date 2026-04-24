@@ -1,5 +1,8 @@
-. (Join-Path (Split-Path -Parent $PSScriptRoot) "lab_paths.ps1")
-. (Join-Path (Split-Path -Parent $PSScriptRoot) "lab_state.ps1")
+$_labRoot = if ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } elseif ($env:LAB_HOME) { $env:LAB_HOME } else { $null }
+if ($_labRoot) {
+    . (Join-Path $_labRoot "lab_paths.ps1")
+    . (Join-Path $_labRoot "lab_state.ps1")
+}
 
 function start-ai {
     param ([string]$Name)
