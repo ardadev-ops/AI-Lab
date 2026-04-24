@@ -1,0 +1,5 @@
+state/
+last_project_path.txt
+projects/*.path
+quickstart/quick-*/
+quickstart/join/

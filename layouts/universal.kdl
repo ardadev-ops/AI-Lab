@@ -1,0 +1,29 @@
+layout {
+    pane split_direction="vertical" {
+        pane split_direction="horizontal" size="76%" {
+            pane split_direction="horizontal" size="68%" {
+                pane name="ACTOR_CLAUDE" command="powershell" {
+                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; if ($env:LAB_SESSION_NAME) { zellij action rename-session $env:LAB_SESSION_NAME }; claude"
+                }
+                pane name="ACTOR_CODEX" command="powershell" {
+                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; codex"
+                }
+            }
+            pane name="RESEARCH_CHAT" command="powershell" size="32%" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"
+            }
+        }
+        pane split_direction="horizontal" size="24%" {
+            pane name="MISSION" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" MISSION.md"
+            }
+            pane name="USAGE" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" USAGE.md"
+            }
+        }
+    }
+
+    pane size=1 borderless=true {
+        plugin location="zellij:compact-bar"
+    }
+}

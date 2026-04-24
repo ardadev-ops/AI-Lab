@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/alkan/.config/zellij/layouts//**)",
+      "Read(//c/Users/alkan/.config/zellij//**)",
+      "WebSearch"
+    ]
+  }
+}

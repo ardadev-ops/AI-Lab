@@ -1,0 +1,14 @@
+layout {
+    pane split_direction="vertical" {
+        pane name="CLAUDE" command="powershell" size="65%" {
+            args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "claude"
+        }
+        pane name="RESEARCH_CHAT" command="powershell" {
+            args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"
+        }
+    }
+
+    pane size=1 borderless=true {
+        plugin location="zellij:compact-bar"
+    }
+}
