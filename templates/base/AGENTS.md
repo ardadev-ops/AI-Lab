@@ -29,6 +29,29 @@ Wenn du eine Aufgabe abgeschlossen hast oder Claude etwas übernehmen soll, schr
 
 Lösche keine Einträge — Rotation erfolgt automatisch durch den Stop-Hook.
 
+## Kollaborations-Protokoll (Shared Files)
+Falls Claude gleichzeitig mit dir an geteilten Dateien arbeitet (MISSION.md, SCRATCHPAD.md, etc.):
+
+1. **Vor dem Schreiben**: Prüfe ob die Datei bereits gelockt ist.
+   - Dateilock prüfen: Existiert `.lab/state/locks/<datei>.lock`?
+   - Ja → Warte ~3 Sekunden und versuche es erneut. Falls >10s: notiere im SCRATCHPAD und fahre fort.
+   - Nein → Weitergabe zu Schritt 2.
+
+2. **Lock setzen** bevor du schreibst:
+   - Erstelle `.lab/state/locks/<datei>.lock` mit folgendem JSON-Inhalt:
+     ```json
+     { "agent": "Codex", "file": "MISSION.md", "timestamp": "2026-04-26T14:23:01" }
+     ```
+
+3. **Schreibe die Datei** (deine Änderungen).
+
+4. **Lock entfernen** sofort nach dem Schreiben:
+   - Lösche die `.lock`-Datei.
+
+**Falls Konflikt erkannt wird**: Im `.lab/state/conflicts/` Verzeichnis erscheint eine `.conflict`-Datei. 
+Der Lab-Watcher zeigt diese im `COLLAB Conflicts`-Pane (Zellij rechts). 
+Der User kann dann `lab-resolve [dateiname]` aufrufen um zu mergen.
+
 ## MISSION.md — Live-Arbeitsplan
 Halte MISSION.md während der Arbeit aktuell:
 - Task starten   -> [~] In Arbeit setzen

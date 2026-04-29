@@ -1,0 +1,166 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-29T18:12:01.653Z",
+  "source": "auto-compact",
+  "partial": false,
+  "phase": null,
+  "phase_name": null,
+  "phase_dir": null,
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "auto-checkpoint",
+  "completed_tasks": [],
+  "remaining_tasks": [],
+  "blockers": [],
+  "human_actions_pending": [],
+  "decisions": [],
+  "uncommitted_files": [
+    {
+      "status": "M",
+      "path": "COMMANDS.md"
+    },
+    {
+      "status": "M",
+      "path": "PORTABLE.md"
+    },
+    {
+      "status": "D",
+      "path": "docs/superpowers/specs/2026-04-24-mission-token-pane-design.md"
+    },
+    {
+      "status": "M",
+      "path": "init.ps1"
+    },
+    {
+      "status": "M",
+      "path": "lab.ps1"
+    },
+    {
+      "status": "M",
+      "path": "lab_paths.ps1"
+    },
+    {
+      "status": "D",
+      "path": "layouts/quick.kdl"
+    },
+    {
+      "status": "D",
+      "path": "layouts/universal.kdl"
+    },
+    {
+      "status": "M",
+      "path": "monitor.ps1"
+    },
+    {
+      "status": "D",
+      "path": "quickstart/MISSION.md"
+    },
+    {
+      "status": "D",
+      "path": "quickstart/USAGE.md"
+    },
+    {
+      "status": "M",
+      "path": "setup-workbench.ps1"
+    },
+    {
+      "status": "D",
+      "path": "shell/profile.ps1"
+    },
+    {
+      "status": "M",
+      "path": "stop_hook.ps1"
+    },
+    {
+      "status": "D",
+      "path": "templates-dotnet/.gitignore"
+    },
+    {
+      "status": "D",
+      "path": "templates-python/.gitignore"
+    },
+    {
+      "status": "D",
+      "path": "templates-python/requirements.txt"
+    },
+    {
+      "status": "D",
+      "path": "templates-python/src/__init__.py"
+    },
+    {
+      "status": "D",
+      "path": "templates-web/.gitignore"
+    },
+    {
+      "status": "D",
+      "path": "templates-web/src/index.html"
+    },
+    {
+      "status": "D",
+      "path": "templates-web/src/script.js"
+    },
+    {
+      "status": "D",
+      "path": "templates-web/src/style.css"
+    },
+    {
+      "status": "D",
+      "path": "templates/AGENTS.md"
+    },
+    {
+      "status": "D",
+      "path": "templates/BOOTSTRAP.md"
+    },
+    {
+      "status": "D",
+      "path": "templates/CLAUDE.md"
+    },
+    {
+      "status": "D",
+      "path": "templates/MISSION.md"
+    },
+    {
+      "status": "D",
+      "path": "templates/PHASE.txt"
+    },
+    {
+      "status": "D",
+      "path": "templates/PROJECT_DNA.md"
+    },
+    {
+      "status": "D",
+      "path": "templates/SCRATCHPAD.md"
+    },
+    {
+      "status": "D",
+      "path": "templates/USAGE.md"
+    },
+    {
+      "status": "??",
+      "path": "lab_collab.ps1"
+    },
+    {
+      "status": "??",
+      "path": "src/"
+    },
+    {
+      "status": "??",
+      "path": "templates/base/"
+    },
+    {
+      "status": "??",
+      "path": "templates/python/"
+    },
+    {
+      "status": "??",
+      "path": "templates/web/"
+    },
+    {
+      "status": "??",
+      "path": "test-syntax.ps1"
+    }
+  ],
+  "next_action": null,
+  "context_notes": "Recent commits:\n7254ea8 Implement Mission pane colors + Token Manager session view\n4f6b580 Add design spec: Mission pane auto-update + Token Manager session view\ndffd7ad Fix em-dash encoding bug in profile.ps1 (Windows-1252 vs UTF-8)\n0e21af8 Fix profile.ps1 PSScriptRoot guard and session load robustness\n5590dc1 Add lab-sessions, lab-kill, lab-killall session management commands"
+}

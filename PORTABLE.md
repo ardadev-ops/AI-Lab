@@ -10,8 +10,9 @@ Diese Werkbank ist jetzt so aufgebaut, dass sie auf einem anderen Laptop oder Se
 
 ## Wichtig
 - `LAB_HOME` zeigt auf den Werkbank-Ordner.
-- Layouts liegen in `layouts/`.
-- Das PowerShell-Profil laedt `shell/profile.ps1`.
+- Layouts liegen in `src/layouts/`.
+- Das PowerShell-Profil laedt `src/shell/profile.ps1`.
+- Templates liegen in `templates/{base,dotnet,python,web}/`.
 - Persoenliche API-Keys und User-Logins bleiben lokal auf dem Zielgeraet.
 
 ## Voraussetzungen

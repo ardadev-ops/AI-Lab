@@ -33,10 +33,11 @@ Lösche keine Einträge — Rotation erfolgt automatisch durch den Stop-Hook.
 
 ## MISSION.md — Live-Arbeitsplan
 Halte MISSION.md während der Arbeit aktuell:
-- Task starten   -> [~] In Arbeit setzen
-- Task fertig    -> [x] Erledigt, nächsten aus Next Up holen
-- Neuer Schritt  -> unter Next Up eintragen
-- Erkenntnis     -> kurz unter Notizen
+- Task starten   -> [~] In Execution setzen
+- Task fertig    -> [x] zu Done verschieben
+- Neuer Schritt  -> unter Plan eintragen
+- Zu prüfen      -> unter Test eintragen
+- Erkenntnis     -> kurz unter Notes
 
 Maximal 3 Eintraege pro Sektion. Token-freundlich: ein Satz pro Eintrag.
 

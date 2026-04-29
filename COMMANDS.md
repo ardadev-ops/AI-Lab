@@ -1,9 +1,10 @@
 # LAB COMMANDS — Referenz
 
-## Starten
+## Starten & Initialisieren
 
 | Befehl                  | Was passiert                                                        |
 |-------------------------|---------------------------------------------------------------------|
+| `init`                  | Laborstruktur im aktuellen Verzeichnis initialisieren                |
 | `start-ai`              | Neue freie Session (auto-name: quick-1, quick-2, ...)               |
 | `start-ai [Name]`       | Neue freie Session mit eigenem Namen                                |
 | `start-ai-join`         | Alle vorhandenen Quickstart-Sessions auflisten                      |
@@ -32,6 +33,9 @@
 | `lab-kill [Name...]`      | Eine oder mehrere Sessions gezielt beenden            |
 | `lab-killall`             | Alle laufenden Sessions auf einmal beenden            |
 | `lab-clean`               | Bekannte Lab-Sessions nach Bestätigung beenden        |
+| `lab-gc`                  | Orphan-Sessions (kein Lab-State) + stale State-Files bereinigen |
+| `lab-switch [Name]`       | Zu einer anderen laufenden Session wechseln           |
+| `lab-dashboard`           | Alle Projekte + Quickstarts auf einen Blick (Phase, Token, Status) |
 | `lab --kill [Name]`       | Einzelne Session beenden (alt)                        |
 | `lab --list`              | Alle registrierten Projekte auflisten                 |
 
@@ -43,6 +47,15 @@
 | `lab [Name] [typ]` (neu)  | Zusätzlich Typ-Templates kopiert                      |
 | Claude beenden            | USAGE.md bekommt Eintrag mit Datum und Phase          |
 | Claude beenden            | Git-Checkpoint: automatischer Commit aller Änderungen |
+
+## Zusammenarbeit & Locks (Claude ↔ Codex)
+
+| Befehl                    | Was passiert                                          |
+|---------------------------|-------------------------------------------------------|
+| `lab-watch`               | Collab-Watcher manuell starten (überwacht MISSION.md, SCRATCHPAD.md) |
+| `lab-locks`               | Alle aktiven Locks anzeigen (Datei-Sperren zwischen Agents) |
+| `lab-unlock [File]`       | Lock für eine Datei entfernen (z.B. `lab-unlock MISSION.md`) |
+| `lab-resolve [File]`      | Konflikte auflösen (bei gleichzeitigen Edits)        |
 
 ## Zellij-Layout (beide Modi)
 

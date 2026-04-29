@@ -5,26 +5,15 @@ $targetDir = Get-Location
 
 Write-Host "Initialisiere Labor-Struktur in: $targetDir" -ForegroundColor Cyan
 
-# 1. Erstelle die notwendigen Dateien
-@"
-# MISSION: [Projektname eintragen]
-
-## Ziel
-- [ ] Ziel in 1-2 klaren Saetzen festhalten
-
-## Next Up
-- [ ] Naechsten sinnvollen Schritt eintragen
-- [ ] Zweiten Schritt eintragen
-
-## In Arbeit
-- [~] Aktuellen Task hierhin ziehen
-
-## Erledigt
-- [x] Fertige Punkte hier sammeln
-
-## Risiken / Offene Fragen
-- Blocker, Unsicherheiten oder Entscheidungen hier notieren
-"@ | Set-Content -Path "MISSION.md" -Encoding UTF8
+# 1. Kopiere Template-Dateien
+$labHome = if ($env:LAB_HOME) { $env:LAB_HOME } else { Split-Path -Parent $PSScriptRoot }
+$templateDir = Join-Path $labHome "templates"
+if (Test-Path $templateDir) {
+    @("MISSION.md", "CLAUDE.md", "BOOTSTRAP.md", "PROJECT_DNA.md", "SCRATCHPAD.md") | ForEach-Object {
+        $src = Join-Path $templateDir $_
+        if (Test-Path $src) { Copy-Item $src -Destination $_ -Force }
+    }
+}
 
 @"
 # USAGE BOARD - [Projektname eintragen]

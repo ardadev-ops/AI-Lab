@@ -1,11 +1,12 @@
 . (Join-Path $PSScriptRoot "lab_paths.ps1")
 . (Join-Path $PSScriptRoot "lab_state.ps1")
+. (Join-Path $PSScriptRoot "src\lab-config.ps1")
 
 param ([string]$Action, [string]$Typ)
 
 # 1. Spezialbefehle
 if ($Action -eq "--list") { Get-ChildItem (Join-Path (Get-LabProjectsDirectory) "*.path") | ForEach-Object { $_.BaseName }; return }
-if ($Action -eq "--kill") { zellij delete-session $Typ 2>$null; Write-Host "Session $Typ beendet."; return }
+if ($Action -eq "--kill") { zellij delete-session $Typ --force 2>$null; Write-Host "Session $Typ beendet."; return }
 
 # 2. Projekt Setup
 $Target = $Action
@@ -32,7 +33,11 @@ if (Test-Path $templateSource) {
         }
     }
     # Projektnamen einsetzen
-    foreach ($file in @("MISSION.md", "USAGE.md")) {
+    $filesToUpdate = @(
+        (Get-LabFileName "Mission"),
+        (Get-LabFileName "Usage")
+    )
+    foreach ($file in $filesToUpdate) {
         $filePath = Join-Path $root $file
         if (Test-Path $filePath) {
             (Get-Content $filePath -Raw -Encoding UTF8) -replace '\[PROJEKTNAME\]', $Target |
@@ -57,6 +62,12 @@ $env:LAB_PROJECT_PATH = $root
 $env:LAB_SESSION_NAME = $Target
 if (-not $env:LAB_HOME) { $env:LAB_HOME = Get-LabHome }
 Set-LabSessionState -SessionName $Target -ProjectPath $root -Mode "project"
-(Get-Date -Format "o") | Set-Content (Join-Path $root "SESSION_START.txt") -Encoding UTF8
+(Get-Date -Format "o") | Set-Content (Join-Path $root (Get-LabFileName "SessionStart")) -Encoding UTF8
 Set-Location $root
+
+# 5a. Collab-Watcher im Hintergrund starten
+. (Join-Path $PSScriptRoot "lab_collab.ps1")
+$watcherJob = Start-LabWatcher -ProjectPath $root -IntervalMs 1000 -WatchFiles @("MISSION.md", "SCRATCHPAD.md")
+Write-Host "Collab Watcher läuft: $watcherJob" -ForegroundColor DarkGray
+
 zellij --layout (Get-LabLayoutPath "universal.kdl")

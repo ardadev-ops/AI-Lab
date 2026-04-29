@@ -16,13 +16,11 @@ layout {
         }
         
         pane split_direction="horizontal" size="30%" {
-            pane split_direction="horizontal" {
-                pane name="🎯 MISSION TO-DO Liste" command="powershell" {
-                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" MISSION.md"
-                }
-                pane name="📊 Token und Session Manager" command="powershell" {
-                    args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" USAGE.md"
-                }
+            pane name="🎯 MISSION TO-DO Liste" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" MISSION.md"
+            }
+            pane name="📊 Session Dashboard" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" DASHBOARD"
             }
             pane name="💬 Chat mit GEMINI" command="powershell" {
                 args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"

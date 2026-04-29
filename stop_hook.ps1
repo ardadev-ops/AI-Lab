@@ -36,7 +36,7 @@ if (-not $isQuickstart) {
     }
 }
 
-# 3. SCRATCHPAD-Rotation: letzte 5 Einträge behalten, Rest archivieren
+# 3. SCRATCHPAD-Cleanup: ALLE Eintraege archivieren, SCRATCHPAD zuruecksetzen
 $scratchpadPath = Join-Path $projectPath "SCRATCHPAD.md"
 if (Test-Path $scratchpadPath) {
     $raw = Get-Content $scratchpadPath -Raw -Encoding UTF8
@@ -49,16 +49,46 @@ if (Test-Path $scratchpadPath) {
         $entryParts = [regex]::Split($entriesRaw, '(?m)(?=^## \[(Claude|Codex))') |
             Where-Object { $_ -match '\S' }
 
-        if ($entryParts.Count -gt 5) {
-            $toArchive = $entryParts[0..($entryParts.Count - 6)]
-            $toKeep    = $entryParts[($entryParts.Count - 5)..($entryParts.Count - 1)]
-
+        if ($entryParts.Count -gt 0) {
+            # Alle Eintraege archivieren
             $archivePath = Join-Path $projectPath "SCRATCHPAD_archive.md"
             $archivePrefix = if (-not (Test-Path $archivePath)) { "# SCRATCHPAD Archive`n`n" } else { "" }
-            Add-Content -Path $archivePath -Value ($archivePrefix + ($toArchive -join "")) -Encoding UTF8
+            Add-Content -Path $archivePath -Value ($archivePrefix + ($entryParts -join "")) -Encoding UTF8
 
-            $newContent = $header.TrimEnd() + "`n`n" + ($toKeep -join "")
-            Set-Content -Path $scratchpadPath -Value $newContent -Encoding UTF8 -NoNewline
+            # SCRATCHPAD zu default Template zuruecksetzen
+            $defaultTemplate = @"
+# SCRATCHPAD: Handoff zwischen Claude und Codex
+
+Wenn du eine Aufgabe abgeschlossen hast oder der andere Agent etwas uebernehmen soll, schreibe ans Ende:
+
+`## [Claude --> Codex] DATUM HH:MM
+**Status**: erledigt | blockiert | Frage
+**Was wurde gemacht**: ...
+**Was Codex tun soll**: ...
+**Relevante Dateien**: src/...
+---
+
+`## [Codex --> Claude] DATUM HH:MM
+**Status**: erledigt | blockiert | Frage
+**Was wurde gemacht**: ...
+**Was Claude tun soll**: ...
+**Relevante Dateien**: src/...
+---
+"@
+            Set-Content -Path $scratchpadPath -Value $defaultTemplate -Encoding UTF8 -NoNewline
         }
     }
 }
+
+# 4. Collab-System Cleanup: Locks freigeben + Watcher stoppen
+. (Join-Path $PSScriptRoot "lab_collab.ps1")
+
+$locksDir = Join-Path $projectPath ".lab\state\locks"
+if (Test-Path $locksDir) {
+    Get-ChildItem -Path $locksDir -Filter "*.lock" -ErrorAction SilentlyContinue |
+        Remove-Item -Force -ErrorAction SilentlyContinue
+}
+
+$watcherJobName = "lab-watcher-$(Split-Path -Leaf $projectPath)"
+Stop-Job -Name $watcherJobName -ErrorAction SilentlyContinue
+Remove-Job -Name $watcherJobName -ErrorAction SilentlyContinue

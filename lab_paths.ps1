@@ -28,16 +28,16 @@ function Get-LabTemplateDirectory {
     param([string]$Type)
 
     if ($Type) {
-        return (Join-LabPath ("templates-" + $Type))
+        return (Join-LabPath (Join-Path "templates" $Type))
     }
 
-    return (Join-LabPath "templates")
+    return (Join-LabPath (Join-Path "templates" "base"))
 }
 
 function Get-LabLayoutPath {
     param([string]$LayoutName)
 
-    return (Join-LabPath (Join-Path "layouts" $LayoutName))
+    return (Join-LabPath (Join-Path (Join-Path "src" "layouts") $LayoutName))
 }
 
 function Get-LabLastProjectPathFile {
@@ -45,7 +45,7 @@ function Get-LabLastProjectPathFile {
 }
 
 function Get-LabShellProfilePath {
-    return (Join-LabPath (Join-Path "shell" "profile.ps1"))
+    return (Join-LabPath (Join-Path (Join-Path "src" "shell") "profile.ps1"))
 }
 
 function Ensure-LabDirectory {
@@ -56,4 +56,12 @@ function Ensure-LabDirectory {
     }
 
     return $Path
+}
+
+function Get-LabLockDirectory {
+    return (Join-LabPath "state/locks")
+}
+
+function Get-LabSnapshotDirectory {
+    return (Join-LabPath "state/snapshots")
 }
