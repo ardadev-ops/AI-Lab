@@ -389,7 +389,9 @@ function Render-Dashboard([string]$path) {
         Write-Host ("  Cache:   {0,7}    Total:  {1,7}" -f $cacheK, $totalK) -ForegroundColor White
         Write-Host ("  Rate:    {0,7}/5min  ▸ {1}" -f $rateK, $rateStatus) -ForegroundColor Yellow
     } else {
-        Write-Host "  (keine Daten noch)" -ForegroundColor DarkGray
+        Write-Host "  Input:        0    Output:        0" -ForegroundColor DarkGray
+        Write-Host "  Cache:        0    Total:         0" -ForegroundColor DarkGray
+        Write-Host "  ↳ Keine Anfragen in dieser Session noch" -ForegroundColor DarkGray
     }
 
     Write-Host ""
