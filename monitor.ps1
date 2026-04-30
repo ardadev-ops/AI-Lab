@@ -25,6 +25,23 @@ function Get-Int64Value($value) {
     return [int64]$value
 }
 
+# Cache für Token-Daten (aktualisiert alle 2s im Monitor-Loop)
+$script:TokenCache = @{}
+$script:TokenCacheTime = @{}
+
+function Get-LastNLines([string]$filePath, [int]$count = 1000) {
+    $lines = @()
+    try {
+        [System.IO.File]::ReadLines($filePath) | ForEach-Object {
+            $lines += $_
+            if ($lines.Count -gt $count) {
+                $lines = $lines[-$count..(-1)]
+            }
+        }
+    } catch {}
+    return $lines
+}
+
 function Get-ClaudeLogFile([string]$path) {
     $claudeRoot = Join-Path $HOME ".claude\projects"
     $projectKey = Get-ClaudeProjectKey $path
@@ -39,6 +56,12 @@ function Get-ClaudeLogFile([string]$path) {
 function Get-SessionTokens([string]$projectPath) {
     $logFile = Get-ClaudeLogFile $projectPath
     if (-not $logFile) { return $null }
+
+    $cacheKey = $logFile.FullName
+    $now = [datetime]::UtcNow
+    if ($script:TokenCacheTime[$cacheKey] -and ($now - $script:TokenCacheTime[$cacheKey]).TotalSeconds -lt 2) {
+        return $script:TokenCache[$cacheKey]
+    }
 
     $sessionStartFile = Join-Path $projectPath (Get-LabFileName "SessionStart")
     $sessionStart = $null
@@ -57,53 +80,32 @@ function Get-SessionTokens([string]$projectPath) {
         Entries      = 0
     }
 
-    # Use streaming to avoid loading entire file into memory
-    try {
-        [System.IO.File]::ReadLines($logFile.FullName) | ForEach-Object {
-            try { $entry = $_ | ConvertFrom-Json } catch { return }
-            $usage = $entry.message.usage
-            if (-not $usage) { return }
+    # Read only last 1000 lines to avoid loading huge files
+    $lines = Get-LastNLines $logFile.FullName 1000
+    foreach ($line in $lines) {
+        try { $entry = $line | ConvertFrom-Json } catch { continue }
+        $usage = $entry.message.usage
+        if (-not $usage) { continue }
 
-            if ($sessionStart) {
-                try {
-                    $ts = [datetime]::Parse($entry.timestamp)
-                    if ($ts -lt $sessionStart) { return }
-                    if (-not $result.LastActivity -or $ts -gt $result.LastActivity) {
-                        $result.LastActivity = $ts
-                    }
-                } catch { return }
-            }
-
-            $result.Input       += Get-Int64Value $usage.input_tokens
-            $result.Output      += Get-Int64Value $usage.output_tokens
-            $result.CacheRead   += Get-Int64Value $usage.cache_read_input_tokens
-            $result.CacheCreate += Get-Int64Value $usage.cache_creation_input_tokens
-            $result.Entries     += 1
+        if ($sessionStart) {
+            try {
+                $ts = [datetime]::Parse($entry.timestamp)
+                if ($ts -lt $sessionStart) { continue }
+                if (-not $result.LastActivity -or $ts -gt $result.LastActivity) {
+                    $result.LastActivity = $ts
+                }
+            } catch { continue }
         }
-    } catch {
-        # Fallback to Get-Content if file is inaccessible
-        foreach ($line in Get-Content $logFile.FullName -Encoding UTF8 -ErrorAction SilentlyContinue) {
-            try { $entry = $line | ConvertFrom-Json } catch { continue }
-            $usage = $entry.message.usage
-            if (-not $usage) { continue }
 
-            if ($sessionStart) {
-                try {
-                    $ts = [datetime]::Parse($entry.timestamp)
-                    if ($ts -lt $sessionStart) { continue }
-                    if (-not $result.LastActivity -or $ts -gt $result.LastActivity) {
-                        $result.LastActivity = $ts
-                    }
-                } catch { continue }
-            }
-
-            $result.Input       += Get-Int64Value $usage.input_tokens
-            $result.Output      += Get-Int64Value $usage.output_tokens
-            $result.CacheRead   += Get-Int64Value $usage.cache_read_input_tokens
-            $result.CacheCreate += Get-Int64Value $usage.cache_creation_input_tokens
-            $result.Entries     += 1
-        }
+        $result.Input       += Get-Int64Value $usage.input_tokens
+        $result.Output      += Get-Int64Value $usage.output_tokens
+        $result.CacheRead   += Get-Int64Value $usage.cache_read_input_tokens
+        $result.CacheCreate += Get-Int64Value $usage.cache_creation_input_tokens
+        $result.Entries     += 1
     }
+
+    $script:TokenCache[$cacheKey] = $result
+    $script:TokenCacheTime[$cacheKey] = $now
 
     return $result
 }
@@ -115,7 +117,9 @@ function Get-TokenRate([string]$projectPath) {
     $cutoff = (Get-Date).AddMinutes(-5)
     $total = [int64]0
 
-    foreach ($line in Get-Content $logFile.FullName -Encoding UTF8) {
+    # Only scan last 500 lines (5min of activity is at most ~50-100 lines)
+    $lines = Get-LastNLines $logFile.FullName 500
+    foreach ($line in $lines) {
         try { $entry = $line | ConvertFrom-Json } catch { continue }
         $usage = $entry.message.usage
         if (-not $usage) { continue }
@@ -147,7 +151,9 @@ function Get-ClaudeUsageSummary([string]$path) {
         Entries     = 0
     }
 
-    foreach ($line in Get-Content $logFile.FullName -Encoding UTF8) {
+    # Stream all lines (this is for overall summary, not Dashboard, so can be slower)
+    $lines = Get-LastNLines $logFile.FullName 5000
+    foreach ($line in $lines) {
         try {
             $entry = $line | ConvertFrom-Json
         } catch {
