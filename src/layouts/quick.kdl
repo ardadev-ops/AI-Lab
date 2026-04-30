@@ -1,10 +1,15 @@
 layout {
     pane split_direction="vertical" {
-        pane name="CLAUDE" command="powershell" size="65%" {
-            args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "claude"
+        pane split_direction="horizontal" size="70%" {
+            pane name="CLAUDE" command="powershell" size="65%" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "claude"
+            }
+            pane name="RESEARCH_CHAT" command="powershell" {
+                args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"
+            }
         }
-        pane name="RESEARCH_CHAT" command="powershell" {
-            args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" "gemini"
+        pane name="📊 Session Dashboard" command="powershell" size="30%" {
+            args "-NoExit" "-ExecutionPolicy" "Bypass" "-Command" ". \"$env:LAB_HOME\\goto_project.ps1\"; & \"$env:LAB_HOME\\monitor.ps1\" DASHBOARD"
         }
     }
 
