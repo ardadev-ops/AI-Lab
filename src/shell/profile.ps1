@@ -524,13 +524,27 @@ function lab-dashboard {
         return $last.ToString("dd.MM")
     }
 
-    function Write-DashRow([string]$nm, [string]$status, [string]$phase, [string]$tokStr, [string]$activity) {
+    function Get-DashWatcherActive([string]$projName) {
+        $jobs = @(Get-Job -Name "lab-watcher-*" -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*$projName*" })
+        return ($jobs.Count -gt 0)
+    }
+
+    function Write-DashRow([string]$nm, [string]$status, [string]$phase, [string]$tokStr, [string]$activity, [int64]$tokens = 0, [bool]$watcherActive = $false) {
         Write-Host -NoNewline ("  {0,-20}" -f (Get-DashName $nm))
         $sc = if ($status -like "*laufend*") { "Green" } elseif ($status -like "*FEHLT*") { "Red" } else { "DarkGray" }
         Write-Host -NoNewline ("{0,-12}" -f $status) -ForegroundColor $sc
         Write-Host -NoNewline ("{0,-16}" -f $phase) -ForegroundColor White
-        Write-Host -NoNewline ("{0,7} tok" -f $tokStr) -ForegroundColor DarkGray
-        if ($activity) { Write-Host ("   {0}" -f $activity) -ForegroundColor DarkGray } else { Write-Host "" }
+
+        # Token-Farbe basierend auf Menge (einfache Heuristik)
+        $tokColor = if ($tokens -gt 100000) { "Red" } elseif ($tokens -gt 50000) { "Yellow" } else { "DarkGray" }
+        Write-Host -NoNewline ("{0,10} tok" -f $tokStr) -ForegroundColor $tokColor
+
+        # Watcher-Status
+        $watcherStr = if ($watcherActive) { "Aktiv" } else { "---" }
+        $watcherColor = if ($watcherActive) { "Green" } else { "DarkGray" }
+        Write-Host -NoNewline ("  {0,-6}" -f $watcherStr) -ForegroundColor $watcherColor
+
+        if ($activity) { Write-Host ("  {0}" -f $activity) -ForegroundColor DarkGray } else { Write-Host "" }
     }
 
     $running = @(
@@ -568,7 +582,8 @@ function lab-dashboard {
             $tok    = Get-DashTotalTokens $d.FullName
             $tokStr = if ($null -ne $tok) { Get-DashTokStr $tok } else { "--" }
             $act    = Get-DashLastActivity $d.FullName
-            Write-DashRow $d.Name $status $phase $tokStr $act
+            $watcherActive = Get-DashWatcherActive $d.Name
+            Write-DashRow $d.Name $status $phase $tokStr $act -tokens $tok -watcherActive $watcherActive
             if ($tok) { $grandTotal += $tok }
             $count++
         }
@@ -584,7 +599,7 @@ function lab-dashboard {
         foreach ($pf in $projFiles) {
             $path = (Get-Content $pf.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue).Trim()
             if (-not $path -or -not (Test-Path $path)) {
-                Write-DashRow $pf.BaseName "[FEHLT]   " "" "--" $null
+                Write-DashRow $pf.BaseName "[FEHLT]   " "" "--" $null -tokens 0 -watcherActive $false
                 $count++
                 continue
             }
@@ -594,7 +609,8 @@ function lab-dashboard {
             $tok    = Get-DashTotalTokens $path
             $tokStr = if ($null -ne $tok) { Get-DashTokStr $tok } else { "--" }
             $act    = Get-DashLastActivity $path
-            Write-DashRow $pf.BaseName $status $phase $tokStr $act
+            $watcherActive = Get-DashWatcherActive $pf.BaseName
+            Write-DashRow $pf.BaseName $status $phase $tokStr $act -tokens $tok -watcherActive $watcherActive
             if ($tok) { $grandTotal += $tok }
             $count++
         }
@@ -684,6 +700,7 @@ function lab-complete {
 
     # Automatische Lektion-Extraktion aus PROJECT_DNA.md
     $newLessons = [System.Collections.Generic.List[string]]::new()
+    $extractedLessons = @()
     if ($dnaContent) {
         # Extrahiere alle Zeilen die mit "- " beginnen
         $dnaLines = $dnaContent -split "`n"
@@ -691,22 +708,37 @@ function lab-complete {
             if ($line -match '^\s*- (.+)$') {
                 $lesson = $matches[1].Trim()
                 if ($lesson -and $lesson.Length -gt 5) {
-                    $newLessons.Add("[$date] [$ProjectName] $lesson")
+                    $extractedLessons += $lesson
                 }
             }
         }
     }
 
-    # Zusätzliche manuelle Lektionen
-    Write-Host "Weitere Lektionen fuer WORKBENCH_BRAIN.md eingeben (optional):" -ForegroundColor Yellow
-    Write-Host "  Format: [tag] Lektion   (z.B. [python] Immer venv vor Start aktivieren)" -ForegroundColor DarkGray
+    # Zeige Top 3 extrahierte Lektionen und frage nach Tags
+    if ($extractedLessons.Count -gt 0) {
+        Write-Host "`nExtrahierte Lektionen aus PROJECT_DNA.md:" -ForegroundColor Yellow
+        $topLessons = $extractedLessons | Select-Object -First 3
+        $idx = 1
+        foreach ($lesson in $topLessons) {
+            Write-Host "  $idx. $lesson" -ForegroundColor DarkGray
+            $tag = Read-Host "     Tag? (#bug, #pattern, #tooling, #workflow) [oder Enter zum Überspringen]"
+            if ($tag.Trim()) {
+                $newLessons.Add("[$tag] $lesson | $ProjectName")
+            }
+            $idx++
+        }
+    }
+
+    # Weitere manuelle Lektionen
+    Write-Host "`nWeitere Lektionen fuer WORKBENCH_BRAIN.md eingeben (optional):" -ForegroundColor Yellow
+    Write-Host "  Format: [tag] Lektion   (z.B. [#pattern] EF Core AsNoTracking bei Read-only Queries)" -ForegroundColor DarkGray
     Write-Host "  Leer lassen + Enter zum Beenden`n" -ForegroundColor DarkGray
 
     $i = 1
     while ($true) {
         $entry = Read-Host "  Lektion $i (oder Enter um zu überspringen)"
         if (-not $entry.Trim()) { break }
-        $newLessons.Add("[$date] [$ProjectName] $entry")
+        $newLessons.Add($entry)
         $i++
     }
 
@@ -731,7 +763,7 @@ function lab-complete {
 
     # LESSONS_LEARNED.md Datei im Projektordner erstellen
     $lessonsPath = Join-Path $projectPath "LESSONS_LEARNED.md"
-    $lessonsTemplate = Get-Content -Path (Join-Path (Get-LabHome) "templates\LESSONS_LEARNED.md") -Raw -Encoding UTF8
+    $lessonsTemplate = Get-Content -Path (Join-Path (Get-LabHome) "templates\base\LESSONS_LEARNED.md") -Raw -Encoding UTF8
     $lessonsContent = $lessonsTemplate `
         -replace '\[PROJEKTNAME\]', $ProjectName `
         -replace '\[DATUM\]', $date

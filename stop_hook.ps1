@@ -41,21 +41,25 @@ $scratchpadPath = Join-Path $projectPath "SCRATCHPAD.md"
 if (Test-Path $scratchpadPath) {
     $raw = Get-Content $scratchpadPath -Raw -Encoding UTF8
 
-    $match = [regex]::Match($raw, '(?m)^## \[(Claude|Codex)')
-    if ($match.Success) {
-        $header = $raw.Substring(0, $match.Index)
-        $entriesRaw = $raw.Substring($match.Index)
+    # Guard: Nur archivieren wenn echte Handoff-Eintraege existieren (mit Zeitstempel)
+    $hasRealEntries = [regex]::IsMatch($raw, '(?m)^## \[(Claude|Codex)[^\]]*\]\s*\d{4}-\d{2}-\d{2}')
 
-        $entryParts = [regex]::Split($entriesRaw, '(?m)(?=^## \[(Claude|Codex))') |
-            Where-Object { $_ -match '\S' }
+    if ($hasRealEntries) {
+        $match = [regex]::Match($raw, '(?m)^## \[(Claude|Codex)')
+        if ($match.Success) {
+            $header = $raw.Substring(0, $match.Index)
+            $entriesRaw = $raw.Substring($match.Index)
 
-        if ($entryParts.Count -gt 0) {
-            # Alle Eintraege archivieren
-            $archivePath = Join-Path $projectPath "SCRATCHPAD_archive.md"
-            $archivePrefix = if (-not (Test-Path $archivePath)) { "# SCRATCHPAD Archive`n`n" } else { "" }
-            Add-Content -Path $archivePath -Value ($archivePrefix + ($entryParts -join "")) -Encoding UTF8
+            $entryParts = [regex]::Split($entriesRaw, '(?m)(?=^## \[(Claude|Codex))') |
+                Where-Object { $_ -match '\S' }
 
-            # SCRATCHPAD zu default Template zuruecksetzen
+            if ($entryParts.Count -gt 0) {
+                # Alle Eintraege archivieren
+                $archivePath = Join-Path $projectPath "SCRATCHPAD_archive.md"
+                $archivePrefix = if (-not (Test-Path $archivePath)) { "# SCRATCHPAD Archive`n`n" } else { "" }
+                Add-Content -Path $archivePath -Value ($archivePrefix + ($entryParts -join "")) -Encoding UTF8
+
+                # SCRATCHPAD zu default Template zuruecksetzen
             $defaultTemplate = @"
 # SCRATCHPAD: Handoff zwischen Claude und Codex
 

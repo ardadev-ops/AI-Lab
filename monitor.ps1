@@ -326,8 +326,11 @@ function Render-Usage([string]$path) {
         } elseif ($rate -le 3000) {
             $statusText  = "[ MITTEL ]"
             $statusColor = "Yellow"
-        } else {
+        } elseif ($rate -le 5000) {
             $statusText  = "[ HOCH ]"
+            $statusColor = "Red"
+        } else {
+            $statusText  = "⚠ [ BURNING ] ⚠"
             $statusColor = "Red"
         }
 
@@ -380,7 +383,7 @@ function Render-Dashboard([string]$path) {
 
         $rate      = Get-TokenRate $projectPath
         $rateK     = "{0:N0}" -f ($rate / 1000)
-        if ($rate -lt 500) { $rateStatus = "LOW" } elseif ($rate -le 3000) { $rateStatus = "MEDIUM" } else { $rateStatus = "HIGH" }
+        if ($rate -lt 500) { $rateStatus = "LOW" } elseif ($rate -le 3000) { $rateStatus = "MEDIUM" } elseif ($rate -le 5000) { $rateStatus = "HIGH" } else { $rateStatus = "BURNING" }
 
         Write-Host ("  Input:   {0,7}    Output: {1,7}" -f $inputK, $outputK) -ForegroundColor White
         Write-Host ("  Cache:   {0,7}    Total:  {1,7}" -f $cacheK, $totalK) -ForegroundColor White

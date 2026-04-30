@@ -58,10 +58,10 @@ function Ensure-LabDirectory {
     return $Path
 }
 
-function Get-LabLockDirectory {
+function Get-LabGlobalLockDirectory {
     return (Join-LabPath "state/locks")
 }
 
-function Get-LabSnapshotDirectory {
+function Get-LabGlobalSnapshotDirectory {
     return (Join-LabPath "state/snapshots")
 }

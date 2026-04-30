@@ -15,8 +15,8 @@ Ensure-LabDirectory (Get-LabSessionStateDirectory) | Out-Null
 Ensure-LabDirectory (Join-Path (Get-LabStateRoot) "locks") | Out-Null
 Ensure-LabDirectory (Join-Path (Get-LabStateRoot) "snapshots") | Out-Null
 Ensure-LabDirectory (Join-Path (Get-LabStateRoot) "conflicts") | Out-Null
-Ensure-LabDirectory (Join-LabPath "shell") | Out-Null
-Ensure-LabDirectory (Join-LabPath "layouts") | Out-Null
+Ensure-LabDirectory (Join-LabPath "src\shell") | Out-Null
+Ensure-LabDirectory (Join-LabPath "src\layouts") | Out-Null
 
 [Environment]::SetEnvironmentVariable("LAB_HOME", $LabHome, "User")
 

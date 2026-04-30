@@ -60,3 +60,19 @@ Halte MISSION.md während der Arbeit aktuell:
 - Erkenntnis     -> kurz unter Notizen
 
 Maximal 3 Eintraege pro Sektion. Token-freundlich: ein Satz pro Eintrag.
+
+## Auto-Learning in WORKBENCH_BRAIN.md
+Wenn du während dieses Projekts auf etwas Wissenswertiges stößt — einen Bug-Pattern, ein Lösungsmuster, ein wichtiges Setup-Detail — schreibe es automatisch ins WORKBENCH_BRAIN.md:
+
+```
+[#tag] Titel | Kurzer Kontext | Was zu tun
+```
+
+**Tags:** `#bug`, `#pattern`, `#tooling`, `#workflow`
+
+**Beispiel:**
+```
+[#pattern] EF Core AsNoTracking | .NET Database Queries | Immer .AsNoTracking() bei Read-only-Queries — 40% weniger Overhead
+```
+
+Dies ist nicht nur für `lab-complete`, sondern während des ganzen Projekts. Schreib die Lektion ans Ende von `$env:LAB_HOME\WORKBENCH_BRAIN.md`.
