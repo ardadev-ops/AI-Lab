@@ -434,10 +434,17 @@ function Render-Dashboard([string]$path) {
 }
 
 $lastSignature = $null
+$lastSignatureTime = [datetime]::UtcNow
 
 while ($true) {
     $currentPath = Join-Path (Get-CurrentProjectPath) $filename
-    $signature = Get-StateSignature -path $currentPath -panelFile $filename
+
+    # Optimization: Cache signature for 5 seconds to avoid expensive file I/O in each loop
+    $now = [datetime]::UtcNow
+    if (($now - $lastSignatureTime).TotalSeconds -ge 5) {
+        $lastSignatureTime = $now
+        $signature = Get-StateSignature -path $currentPath -panelFile $filename
+    }
 
     if ($signature -ne $lastSignature) {
         if ($filename -eq "MISSION.md") {
