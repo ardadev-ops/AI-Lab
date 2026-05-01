@@ -65,7 +65,15 @@ Set-LabSessionState -SessionName $Target -ProjectPath $root -Mode "project"
 (Get-Date -Format "o") | Set-Content (Join-Path $root (Get-LabFileName "SessionStart")) -Encoding UTF8
 Set-Location $root
 
-# 5a. Collab-Watcher im Hintergrund starten
+# 5a. Lab-Startup: Token-Service und andere Background-Jobs starten
+$startupScript = Join-Path $root "src\lab-startup.ps1"
+if (Test-Path $startupScript) {
+    . $startupScript -ProjectPath $root
+} else {
+    Write-Host "Warnung: lab-startup.ps1 nicht gefunden" -ForegroundColor Yellow
+}
+
+# 5b. Collab-Watcher im Hintergrund starten
 . (Join-Path $PSScriptRoot "lab_collab.ps1")
 $watcherJob = Start-LabWatcher -ProjectPath $root -IntervalMs 1000 -WatchFiles @("MISSION.md", "SCRATCHPAD.md")
 Write-Host "Collab Watcher läuft: $watcherJob" -ForegroundColor DarkGray

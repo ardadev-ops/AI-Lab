@@ -1,7 +1,13 @@
-param($filename)
+param($filename = "DASHBOARD")
 
 # Load config
 . (Join-Path $PSScriptRoot "src\lab-config.ps1")
+
+# Ensure filename is set to a valid mode, strip whitespace
+if ($filename) { $filename = $filename.Trim() }
+if (-not $filename -or $filename -eq "") {
+    $filename = "DASHBOARD"
+}
 
 function Get-CurrentProjectPath {
     return (Get-Location).Path
