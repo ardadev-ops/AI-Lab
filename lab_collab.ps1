@@ -137,10 +137,10 @@ $ContentAfter2
 
 function Get-LabConflicts {
     param (
-        [string]$ProjectPath = (Get-LabCurrentProjectPath)
+        [string]$ProjectPath = $env:LAB_PROJECT_PATH
     )
-    $conflictsDir = Join-Path $ProjectPath ".\.lab\state\conflicts"
-    if (-not (Test-Path $conflictsDir)) { return @() }
+    $conflictsDir = Get-LabConflictDirectory -ProjectPath $ProjectPath
+    if (-not $conflictsDir -or -not (Test-Path $conflictsDir)) { return @() }
 
     Get-ChildItem -Path $conflictsDir -Filter "*.conflict" -ErrorAction SilentlyContinue |
         Where-Object { $_ -match "\.conflict$" }
@@ -150,7 +150,7 @@ function Resolve-LabConflict {
     param (
         [Parameter(Mandatory = $true)][string]$ConflictFile,
         [Parameter(Mandatory = $true)][string]$Choice,  # "1" or "2" for which version to keep
-        [string]$ProjectPath = (Get-LabCurrentProjectPath)
+        [string]$ProjectPath = $env:LAB_PROJECT_PATH
     )
 
     if (-not (Test-Path $ConflictFile)) {
@@ -273,24 +273,32 @@ function Stop-LabWatcher {
 # === HELPER FUNCTIONS (Path management) ===
 
 function Get-LabLockDirectory {
-    $stateDir = Get-LabStateDirectory
+    param([string]$ProjectPath)
+    $stateDir = Get-LabStateDirectory -ProjectPath $ProjectPath
+    if (-not $stateDir) { return $null }
     return Join-Path $stateDir "locks"
 }
 
 function Get-LabSnapshotDirectory {
-    $stateDir = Get-LabStateDirectory
+    param([string]$ProjectPath)
+    $stateDir = Get-LabStateDirectory -ProjectPath $ProjectPath
+    if (-not $stateDir) { return $null }
     return Join-Path $stateDir "snapshots"
 }
 
 function Get-LabConflictDirectory {
-    $stateDir = Get-LabStateDirectory
+    param([string]$ProjectPath)
+    $stateDir = Get-LabStateDirectory -ProjectPath $ProjectPath
+    if (-not $stateDir) { return $null }
     return Join-Path $stateDir "conflicts"
 }
 
 function Get-LabStateDirectory {
-    if ($env:LAB_PROJECT_PATH) {
-        return Join-Path $env:LAB_PROJECT_PATH ".lab\state"
-    }
-    $projPath = Get-LabCurrentProjectPath
-    return Join-Path $projPath ".lab\state"
+    param([string]$ProjectPath)
+
+    if (-not $ProjectPath) { $ProjectPath = $env:LAB_PROJECT_PATH }
+    if (-not $ProjectPath) { $ProjectPath = (Get-Location).Path }
+    if (-not $ProjectPath) { return $null }
+
+    return Join-Path $ProjectPath ".lab\state"
 }

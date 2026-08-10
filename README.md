@@ -30,23 +30,27 @@ AI-Lab/
 ├── COMMANDS.md              # Befehlsreferenz
 ├── WORKBENCH_BRAIN.md       # Destillierte Lektionen aus abgeschlossenen Projekten
 ├── PORTABLE.md              # Anleitung zur Portierung auf andere Systeme
-├── docs/
-│   └── superpowers/specs/   # Spezifikationen und Dokumentation
-├── layouts/                 # Zellij-Terminal-Layouts (Panel-Anordnung)
+├── src/
+│   ├── lab-config.ps1       # Zentrale Konfiguration (Dateinamen, Helper)
+│   ├── layouts/             # Zellij-Terminal-Layouts (universal.kdl, quick.kdl)
+│   └── shell/
+│       └── profile.ps1      # PowerShell-Profil mit allen Befehlen
+├── projects/                # Registrierte Projekte (Pfad-Registry)
 ├── quickstart/              # Freie Sessions ohne Projektbindung
-├── shell/
-│   └── profile.ps1          # PowerShell-Profil mit allen Befehlen
-├── templates/               # Basis-Projekt-Templates
-├── templates-dotnet/        # .NET-Projekt-Template
-├── templates-python/        # Python-Projekt-Template
-└── templates-web/           # HTML/CSS/JS-Projekt-Template
+├── templates/
+│   ├── base/                # Basis-Template für alle Projekte
+│   ├── dotnet/              # .NET-Projekt-Template (Template.csproj + src/)
+│   ├── python/              # Python-Projekt-Template (src/main.py)
+│   └── web/                 # HTML/CSS/JS-Projekt-Template (index.html + src/)
+├── state/                   # Laufzeit-Zustand (Session-Registry)
+└── docs/                    # Spezifikationen und Dokumentation
 ```
 
 ### Technologie-Stack
 
 - **PowerShell** — 98.5 % des Codes (Steuerlogik, Automatisierung, Profile)
 - **Zellij** — Terminal-Multiplexer (ersetzt tmux), verwaltet Panel-Layouts
-- **HTML/CSS** — 1.5 % (Layout-Konfigurationen)
+- **KDL** — Layout-Konfigurationen für Zellij (1.5 %)
 
 ---
 
@@ -87,6 +91,11 @@ Folgende Tools müssen installiert sein:
 | **Claude** (Anthropic CLI) | KI-Agent 1 |
 | **Codex** (OpenAI CLI) | KI-Agent 2 |
 | **Gemini** (Google CLI) | KI-Monitor |
+
+> **Hinweis (Windows):** Zellij läuft nativ nur auf Linux/macOS. Auf Windows muss es
+> unter **WSL** installiert und von dort gestartet werden — die Layouts öffnen dann
+> `powershell.exe` für die Panes. Die PowerShell-Skripte selbst funktionieren auf
+> Windows und WSL gleichermaßen.
 
 ---
 

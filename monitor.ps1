@@ -2,6 +2,7 @@ param($filename = "DASHBOARD")
 
 # Load config
 . (Join-Path $PSScriptRoot "src\lab-config.ps1")
+. (Join-Path $PSScriptRoot "lab_collab.ps1")
 
 # Ensure filename is set to a valid mode, strip whitespace
 if ($filename) { $filename = $filename.Trim() }
@@ -203,7 +204,7 @@ function Get-StateSignature([string]$path, [string]$panelFile) {
         } else {
             $parts += "no-claude-log"
         }
-        $ssFile = Join-Path $pp "SESSION_START.txt"
+        $ssFile = Join-Path $pp (Get-LabFileName "SessionStart")
         if (Test-Path $ssFile) {
             $ssItem = Get-Item $ssFile
             $parts += $ssItem.LastWriteTimeUtc.Ticks
@@ -255,13 +256,13 @@ function Render-Mission([string]$path) {
 function Render-Conflicts {
     Clear-Host
     $projectPath = Get-CurrentProjectPath
-    $conflictsDir = Join-Path $projectPath ".lab\state\conflicts"
 
     Write-Host "COLLABORATION CONFLICTS" -ForegroundColor Cyan
     Write-Host "Path: $projectPath" -ForegroundColor DarkGray
     Write-Host ""
 
-    if (-not (Test-Path $conflictsDir)) {
+    $conflictsDir = Get-LabConflictDirectory -ProjectPath $projectPath
+    if (-not $conflictsDir -or -not (Test-Path $conflictsDir)) {
         Write-Host "No conflicts directory yet." -ForegroundColor Gray
         return
     }
@@ -309,7 +310,7 @@ function Render-Usage([string]$path) {
     $sessionName = Split-Path $projectPath -Leaf
     $phase = Get-Phase
 
-    $sessionStartFile = Join-Path $projectPath "SESSION_START.txt"
+    $sessionStartFile = Join-Path $projectPath (Get-LabFileName "SessionStart")
     $sinceStr = "?"
     if (Test-Path $sessionStartFile) {
         $raw = (Get-Content $sessionStartFile -Raw -Encoding UTF8).Trim()
@@ -354,7 +355,7 @@ function Render-Usage([string]$path) {
         Write-Host ("Tokens:  {0,8}   Input: {1} / Output: {2}" -f $totalFmt, $inputK, $outputK) -ForegroundColor Green
         Write-Host ("Cache:   {0,8}   gespart" -f $cacheFmt) -ForegroundColor DarkGray
         Write-Host ("Rate:    {0,8} / 5min" -f $rateK) -ForegroundColor Yellow
-        Write-Host -NoNewline "Status:  "
+        Write-Host -NoNewline "Status:"
         Write-Host $statusText -ForegroundColor $statusColor
         Write-Host ""
         Write-Host ("Letzte Aktivitaet: {0}" -f $lastActStr) -ForegroundColor DarkGray
@@ -376,7 +377,7 @@ function Render-Dashboard([string]$path) {
     Write-Host "----------------------------------------" -ForegroundColor Cyan
     Write-Host ""
 
-    $sessionStartFile = Join-Path $projectPath "SESSION_START.txt"
+    $sessionStartFile = Join-Path $projectPath (Get-LabFileName "SessionStart")
     $sessionStartTime = "?"
     if (Test-Path $sessionStartFile) {
         $raw = (Get-Content $sessionStartFile -Raw -Encoding UTF8).Trim()
@@ -399,11 +400,11 @@ function Render-Dashboard([string]$path) {
 
         Write-Host ("  Input:   {0,7}    Output: {1,7}" -f $inputK, $outputK) -ForegroundColor White
         Write-Host ("  Cache:   {0,7}    Total:  {1,7}" -f $cacheK, $totalK) -ForegroundColor White
-        Write-Host ("  Rate:    {0,7}/5min  ▸ {1}" -f $rateK, $rateStatus) -ForegroundColor Yellow
+        Write-Host ("  Rate:    {0,7}/5min  > {1}" -f $rateK, $rateStatus) -ForegroundColor Yellow
     } else {
         Write-Host "  Input:        0    Output:        0" -ForegroundColor DarkGray
         Write-Host "  Cache:        0    Total:         0" -ForegroundColor DarkGray
-        Write-Host "  ↳ Keine Anfragen in dieser Session noch" -ForegroundColor DarkGray
+        Write-Host " Keine Anfragen in dieser Session noch" -ForegroundColor DarkGray
     }
 
     Write-Host ""
@@ -414,7 +415,7 @@ function Render-Dashboard([string]$path) {
     Write-Host ""
 
     # Conflicts Check
-    $conflictsDir = Join-Path $projectPath ".lab\state\conflicts"
+    $conflictsDir = Get-LabConflictDirectory -ProjectPath $projectPath
     if (Test-Path $conflictsDir) {
         $conflicts = @(Get-ChildItem -Path $conflictsDir -Filter "*.conflict" -ErrorAction SilentlyContinue)
         if ($conflicts.Count -eq 0) {
@@ -434,12 +435,14 @@ function Render-Dashboard([string]$path) {
 }
 
 $lastSignature = $null
-$lastSignatureTime = [datetime]::UtcNow
+$signature = $null
+$lastSignatureTime = [datetime]::MinValue
 
 while ($true) {
     $currentPath = Join-Path (Get-CurrentProjectPath) $filename
 
     # Optimization: Cache signature for 5 seconds to avoid expensive file I/O in each loop
+    # MinValue sorgt dafuer, dass der erste Durchlauf sofort eine Signatur berechnet und rendert.
     $now = [datetime]::UtcNow
     if (($now - $lastSignatureTime).TotalSeconds -ge 5) {
         $lastSignatureTime = $now
@@ -468,5 +471,5 @@ while ($true) {
         $lastSignature = $signature
     }
 
-    Start-Sleep 2
+    Start-Sleep 5
 }

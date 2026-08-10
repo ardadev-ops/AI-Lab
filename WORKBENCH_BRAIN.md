@@ -16,3 +16,5 @@ Jede Lektion = `[TAG] Titel | Kontext | Was zu tun`
 [#bug] SESSION_START-Filtering in Token-Ausgabe | Lab Monitor Dashboard | SESSION_START wird oft zu früh gesetzt (bevor erste Claude-Anfrage). Filter mit `$ts -lt $sessionStart` führt zu 0 Entries. Lösung: Dashboard sollte 0-Werte sauber formatieren statt "keine Daten noch" — gibt Signal, dass Session läuft aber keine Anfragen gemacht wurden.
 
 ---
+[#tooling] Java-Build ausserhalb Lab-Workspace | Sandbox schreibt nicht ins Zielprojekt-out | `javac -d out src\Main.java` mit eskaliertem Schreibzugriff ausfuehren
+[#pattern] Sparse Conway-Welt | Infinite Game of Life | Lebende Zellen in einem Set halten und naechste Generation ueber Neighbor-Counts berechnen

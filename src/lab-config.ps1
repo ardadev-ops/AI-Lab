@@ -11,14 +11,6 @@ $script:LAB_FILE_NAMES = @{
     SessionStart = "SESSION_START.txt"
 }
 
-$script:LAB_DIR_NAMES = @{
-    Locks       = "state/locks"
-    Snapshots   = "state/snapshots"
-    Sessions    = "state/sessions"
-    Projects    = "projects"
-    Quickstart  = "quickstart"
-}
-
 # Hilfsfunktion zum Zugriff auf Konfiguration
 function Get-LabFileName {
     param([string]$Key)
@@ -26,15 +18,6 @@ function Get-LabFileName {
         return $script:LAB_FILE_NAMES[$Key]
     }
     Write-Warning "Unknown file key: $Key"
-    return $null
-}
-
-function Get-LabDirName {
-    param([string]$Key)
-    if ($script:LAB_DIR_NAMES.ContainsKey($Key)) {
-        return $script:LAB_DIR_NAMES[$Key]
-    }
-    Write-Warning "Unknown directory key: $Key"
     return $null
 }
 

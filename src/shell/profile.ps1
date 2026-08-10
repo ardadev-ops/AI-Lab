@@ -2,6 +2,7 @@ $_labRoot = if ($PSScriptRoot) { Split-Path -Parent (Split-Path -Parent $PSScrip
 if ($_labRoot) {
     . (Join-Path $_labRoot "lab_paths.ps1")
     . (Join-Path $_labRoot "lab_state.ps1")
+    . (Join-Path $_labRoot "src\lab-config.ps1")
 
     # Auto-Cleanup: Verwaiste/beendete Background-Jobs entfernen
     @(Get-Job -Name "lab-watcher-*" -ErrorAction SilentlyContinue | Where-Object { $_.State -ne "Running" }) |
@@ -54,7 +55,7 @@ function start-ai {
     $env:LAB_PROJECT_PATH = $sessionPath
     $env:LAB_SESSION_NAME = $Name
     Set-LabSessionState -SessionName $Name -ProjectPath $sessionPath -Mode "quickstart"
-    (Get-Date -Format "o") | Set-Content (Join-Path $sessionPath "SESSION_START.txt") -Encoding UTF8
+    (Get-Date -Format "o") | Set-Content (Join-Path $sessionPath (Get-LabFileName "SessionStart")) -Encoding UTF8
 
     # Collab-Watcher starten
     . (Join-Path $env:LAB_HOME "lab_collab.ps1")
@@ -145,7 +146,9 @@ function lab-create {
         foreach ($file in @("MISSION.md", "USAGE.md")) {
             $filePath = Join-Path $fullPath $file
             if (Test-Path $filePath) {
-                (Get-Content $filePath -Raw -Encoding UTF8) -replace '\[PROJEKTNAME\]', $ProjectName |
+                (Get-Content $filePath -Raw -Encoding UTF8) `
+                    -replace '\[PROJEKTNAME\]', $ProjectName `
+                    -replace '\[DATUM\]', (Get-Date -Format "yyyy-MM-dd HH:mm") |
                     Set-Content $filePath -Encoding UTF8 -NoNewline
             }
         }
@@ -749,13 +752,13 @@ function lab-complete {
 
         Add-Content $brainPath -Value ($newLessons -join "`n") -Encoding UTF8
 
-        # Rotation: max 50 Eintraege (Zeilen die mit [20xx- beginnen)
+        # Rotation: max 50 Eintraege (Lektionen beginnen mit '[' — z.B. [#bug], [#pattern])
         $allLines = Get-Content $brainPath -Encoding UTF8
-        $header   = $allLines | Where-Object { $_ -notmatch '^\[20\d\d-' }
-        $entries  = @($allLines | Where-Object { $_ -match '^\[20\d\d-' })
+        $header   = @($allLines | Where-Object { $_ -notmatch '^\s*\[' -and $_ -notmatch '^\s*---\s*$' })
+        $entries  = @($allLines | Where-Object { $_ -match '^\s*\[' })
         if ($entries.Count -gt 50) {
             $entries = $entries | Select-Object -Last 50
-            ($header + $entries) -join "`n" | Set-Content $brainPath -Encoding UTF8
+            (($header -join "`n").TrimEnd() + "`n`n" + ($entries -join "`n")) | Set-Content $brainPath -Encoding UTF8
         }
 
         Write-Host "`n$($newLessons.Count) Lektion(en) in WORKBENCH_BRAIN.md eingetragen." -ForegroundColor Green
@@ -809,7 +812,9 @@ function lab-watch {
 
 function lab-locks {
     $projPath = Get-LabCurrentProjectPath -SessionName $env:LAB_SESSION_NAME
-    $locksDir = Join-Path $projPath ".lab\state\locks"
+
+    . (Join-Path $env:LAB_HOME "lab_collab.ps1")
+    $locksDir = Get-LabLockDirectory -ProjectPath $projPath
 
     if (-not (Test-Path $locksDir)) {
         Write-Host "Keine Locks vorhanden (oder noch kein Projekt initialisiert)." -ForegroundColor Gray
@@ -852,7 +857,7 @@ function lab-resolve {
     . (Join-Path $env:LAB_HOME "lab_collab.ps1")
 
     $projPath = Get-LabCurrentProjectPath -SessionName $env:LAB_SESSION_NAME
-    $conflictsDir = Join-Path $projPath ".lab\state\conflicts"
+    $conflictsDir = Get-LabConflictDirectory -ProjectPath $projPath
 
     if (-not (Test-Path $conflictsDir)) {
         Write-Host "Keine Konflikt-Verzeichnis. Kein Conflict-Watcher aktiv?" -ForegroundColor Yellow

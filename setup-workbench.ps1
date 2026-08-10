@@ -12,9 +12,6 @@ Ensure-LabDirectory (Get-LabProjectsDirectory) | Out-Null
 Ensure-LabDirectory (Get-LabQuickstartDirectory) | Out-Null
 Ensure-LabDirectory (Get-LabStateRoot) | Out-Null
 Ensure-LabDirectory (Get-LabSessionStateDirectory) | Out-Null
-Ensure-LabDirectory (Join-Path (Get-LabStateRoot) "locks") | Out-Null
-Ensure-LabDirectory (Join-Path (Get-LabStateRoot) "snapshots") | Out-Null
-Ensure-LabDirectory (Join-Path (Get-LabStateRoot) "conflicts") | Out-Null
 Ensure-LabDirectory (Join-LabPath "src\shell") | Out-Null
 Ensure-LabDirectory (Join-LabPath "src\layouts") | Out-Null
 

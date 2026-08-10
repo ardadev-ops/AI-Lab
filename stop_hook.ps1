@@ -60,7 +60,7 @@ if (Test-Path $scratchpadPath) {
                 Add-Content -Path $archivePath -Value ($archivePrefix + ($entryParts -join "")) -Encoding UTF8
 
                 # SCRATCHPAD zu default Template zuruecksetzen
-            $defaultTemplate = @"
+                $defaultTemplate = @"
 # SCRATCHPAD: Handoff zwischen Claude und Codex
 
 Wenn du eine Aufgabe abgeschlossen hast oder der andere Agent etwas uebernehmen soll, schreibe ans Ende:
@@ -79,7 +79,8 @@ Wenn du eine Aufgabe abgeschlossen hast oder der andere Agent etwas uebernehmen 
 **Relevante Dateien**: src/...
 ---
 "@
-            Set-Content -Path $scratchpadPath -Value $defaultTemplate -Encoding UTF8 -NoNewline
+                Set-Content -Path $scratchpadPath -Value $defaultTemplate -Encoding UTF8 -NoNewline
+            }
         }
     }
 }
@@ -87,7 +88,7 @@ Wenn du eine Aufgabe abgeschlossen hast oder der andere Agent etwas uebernehmen 
 # 4. Collab-System Cleanup: Locks freigeben + Watcher stoppen
 . (Join-Path $PSScriptRoot "lab_collab.ps1")
 
-$locksDir = Join-Path $projectPath ".lab\state\locks"
+$locksDir = Get-LabLockDirectory -ProjectPath $projectPath
 if (Test-Path $locksDir) {
     Get-ChildItem -Path $locksDir -Filter "*.lock" -ErrorAction SilentlyContinue |
         Remove-Item -Force -ErrorAction SilentlyContinue

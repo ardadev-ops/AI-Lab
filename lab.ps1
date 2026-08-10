@@ -40,7 +40,9 @@ if (Test-Path $templateSource) {
     foreach ($file in $filesToUpdate) {
         $filePath = Join-Path $root $file
         if (Test-Path $filePath) {
-            (Get-Content $filePath -Raw -Encoding UTF8) -replace '\[PROJEKTNAME\]', $Target |
+            (Get-Content $filePath -Raw -Encoding UTF8) `
+                -replace '\[PROJEKTNAME\]', $Target `
+                -replace '\[DATUM\]', (Get-Date -Format "yyyy-MM-dd HH:mm") |
                 Set-Content $filePath -Encoding UTF8 -NoNewline
         }
     }

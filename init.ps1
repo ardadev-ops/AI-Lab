@@ -7,7 +7,7 @@ Write-Host "Initialisiere Labor-Struktur in: $targetDir" -ForegroundColor Cyan
 
 # 1. Kopiere Template-Dateien
 $labHome = if ($env:LAB_HOME) { $env:LAB_HOME } else { Split-Path -Parent $PSScriptRoot }
-$templateDir = Join-Path $labHome "templates"
+$templateDir = Join-Path $labHome "templates\base"
 if (Test-Path $templateDir) {
     @("MISSION.md", "CLAUDE.md", "BOOTSTRAP.md", "PROJECT_DNA.md", "SCRATCHPAD.md") | ForEach-Object {
         $src = Join-Path $templateDir $_
@@ -27,9 +27,6 @@ if (Test-Path $templateDir) {
 
 ## Verlauf
 "@ | Set-Content -Path "USAGE.md" -Encoding UTF8
-
-# 2. Erstelle einen Ordner fuer lokale Extensions/Plugins (optional)
-New-Item -Path ".lab_extensions" -ItemType Directory -Force | Out-Null
 
 Write-Host "Labor-Struktur erfolgreich erstellt!" -ForegroundColor Green
 Write-Host "Starte jetzt 'start-ai', um das Zellij-Layout zu laden." -ForegroundColor Yellow
